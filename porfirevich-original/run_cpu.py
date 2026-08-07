@@ -75,15 +75,16 @@ def sample_sequence(
     num_samples: int,
     filter_single: list[int],
     filter_double: list[int],
+    device: torch.device | str = "cpu",
 ) -> torch.Tensor:
     """Original sampling loop, intentionally without a modern KV-cache rewrite."""
-    context_tensor = torch.tensor(context, dtype=torch.long, device="cpu")
+    context_tensor = torch.tensor(context, dtype=torch.long, device=device)
     generated = context_tensor.unsqueeze(0).repeat(num_samples, 1)
 
     with torch.inference_mode():
         for _ in range(length):
             outputs = model(input_ids=generated[:, -1023:])
-            next_tokens = torch.zeros(num_samples, dtype=torch.long, device="cpu")
+            next_tokens = torch.zeros(num_samples, dtype=torch.long, device=device)
             for sample_index in range(num_samples):
                 next_token_logits = outputs[0][sample_index, -1, :] / 1.0
                 next_token_logits[filter_single] = FILTER_VALUE
@@ -122,6 +123,7 @@ def generate_replies(
     profile: str,
     filter_single: list[int],
     newline_token: list[int],
+    device: torch.device | str = "cpu",
 ) -> list[str]:
     context_tokens = tokenizer.encode(prompt)
     generated = sample_sequence(
@@ -131,6 +133,7 @@ def generate_replies(
         num_samples=num_samples,
         filter_single=filter_single,
         filter_double=newline_token,
+        device=device,
     ).to("cpu")
 
     decoded_prompt_length = len(tokenizer.decode(context_tokens))
@@ -139,6 +142,36 @@ def generate_replies(
         continuation = tokenizer.decode(item)[decoded_prompt_length:]
         replies.append(trim_like_site(continuation, profile))
     return replies
+
+
+def resolve_device(requested: str) -> torch.device:
+    if requested == "auto":
+        requested = "cuda" if torch.cuda.is_available() else "cpu"
+    if requested == "cuda" and not torch.cuda.is_available():
+        raise SystemExit(
+            "CUDA/ROCm is not available in this PyTorch environment; use --device cpu."
+        )
+    return torch.device(requested)
+
+
+def seed_runtime(seed: int, device: torch.device) -> None:
+    torch.manual_seed(seed)
+    if device.type == "cuda":
+        torch.cuda.manual_seed_all(seed)
+
+
+def build_filters(
+    tokenizer: OriginalYTEncoder,
+    profile: str,
+    allow_linebreak: bool,
+) -> tuple[list[int], list[int]]:
+    newline_token = tokenizer.encode("\n")[-1:]
+    filter_single = [1]
+    if profile == "latest-site":
+        filter_single += tokenizer.encode("[")[-1:] + tokenizer.encode("(")[-1:]
+    if not allow_linebreak:
+        filter_single += newline_token
+    return filter_single, newline_token
 
 
 def pick_reply(
@@ -213,6 +246,12 @@ def parse_args() -> argparse.Namespace:
         help="set a reproducible seed; omitted matches the service's evolving RNG state",
     )
     parser.add_argument("--threads", type=int, help="PyTorch CPU worker threads")
+    parser.add_argument(
+        "--device",
+        choices=("cpu", "cuda", "auto"),
+        default="cpu",
+        help="execution device; ROCm-backed PyTorch also uses 'cuda'",
+    )
     parser.add_argument("--model", type=Path, default=DEFAULT_MODEL)
     return parser.parse_args()
 
@@ -232,8 +271,9 @@ def main() -> None:
         raise SystemExit("--num-samples is outside the selected profile's service limit")
     if args.threads is not None:
         torch.set_num_threads(args.threads)
+    device = resolve_device(args.device)
     if args.seed is not None:
-        torch.manual_seed(args.seed)
+        seed_runtime(args.seed, device)
 
     tokenizer = OriginalYTEncoder(args.model / "encoder.model")
     model = GPT2LMHeadModel.from_pretrained(
@@ -241,15 +281,14 @@ def main() -> None:
         local_files_only=True,
         use_safetensors=False,
     )
-    model.to("cpu")
+    model.to(device)
     model.eval()
 
-    newline_token = tokenizer.encode("\n")[-1:]
-    filter_single = [1]
-    if args.profile == "latest-site":
-        filter_single += tokenizer.encode("[")[-1:] + tokenizer.encode("(")[-1:]
-    if not args.allow_linebreak:
-        filter_single += newline_token
+    filter_single, newline_token = build_filters(
+        tokenizer,
+        args.profile,
+        args.allow_linebreak,
+    )
 
     if args.iterations is None:
         replies = generate_replies(
@@ -261,6 +300,7 @@ def main() -> None:
             profile=args.profile,
             filter_single=filter_single,
             newline_token=newline_token,
+            device=device,
         )
         print(json.dumps({"replies": replies}, ensure_ascii=False, indent=2))
         return
@@ -277,6 +317,7 @@ def main() -> None:
             profile=args.profile,
             filter_single=filter_single,
             newline_token=newline_token,
+            device=device,
         )
         accumulated_text += pick_reply(
             replies,

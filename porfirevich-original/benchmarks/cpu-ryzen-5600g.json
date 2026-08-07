@@ -1,0 +1,64 @@
+{
+  "benchmark_version": 1,
+  "timestamp_utc": "2026-08-07T17:35:48.293359+00:00",
+  "runtime": {
+    "python": "3.14.4",
+    "torch": "2.13.0+cpu",
+    "transformers": "4.57.6",
+    "youtokentome": "1.0.6",
+    "torch_cuda": null,
+    "torch_hip": null
+  },
+  "device": {
+    "requested": "cpu",
+    "resolved": "cpu",
+    "name": "AMD Ryzen 5 5600G with Radeon Graphics",
+    "cpu_threads": 6,
+    "gpu_memory": null
+  },
+  "workload": {
+    "prompt": "Однажды вечером",
+    "prompt_tokens": 2,
+    "length": 15,
+    "num_samples": 3,
+    "generated_tokens_per_run": 45,
+    "profile": "latest-site",
+    "allow_linebreak": false,
+    "seed_reset_each_run": 42,
+    "sampler": "original-uncached"
+  },
+  "model_load_seconds": 1.265685,
+  "warmup_seconds": [
+    3.285107
+  ],
+  "run_seconds": [
+    3.176978,
+    3.186991,
+    3.201183,
+    3.196003,
+    3.20056
+  ],
+  "summary": {
+    "runs": 5,
+    "mean_seconds": 3.192343,
+    "median_seconds": 3.196003,
+    "min_seconds": 3.176978,
+    "max_seconds": 3.201183,
+    "population_stdev_seconds": 0.009207,
+    "mean_generated_tokens_per_second": 14.09623,
+    "outputs_identical": true
+  },
+  "output_sha256": [
+    "63149274d12381e03da7f4e0b56c329e1102f9dc874989df70ece3be1747e72d",
+    "63149274d12381e03da7f4e0b56c329e1102f9dc874989df70ece3be1747e72d",
+    "63149274d12381e03da7f4e0b56c329e1102f9dc874989df70ece3be1747e72d",
+    "63149274d12381e03da7f4e0b56c329e1102f9dc874989df70ece3be1747e72d",
+    "63149274d12381e03da7f4e0b56c329e1102f9dc874989df70ece3be1747e72d"
+  ],
+  "sample_replies": [
+    " другие теперь господствовали в Сиэтле.",
+    " Человеку жилось хорошо; жил он успешно, не болел.",
+    " - потому что эта песня всегда была в ее жизни."
+  ],
+  "process_peak_rss_kib": 2180532
+}

@@ -142,6 +142,21 @@ For an identical prompt, filters, seed, and model, the recovered 2019
 Known-good outputs and the executable comparison are committed under
 `porfirevich-original/tests/`.
 
+A repeatable five-round benchmark of the same 15-token × 3-candidate workload,
+after one warmup round, averaged 3.192 seconds with a 0.009-second population
+standard deviation (14.10 requested generated tokens/second). All five output
+hashes matched. The full report is in
+`porfirevich-original/benchmarks/cpu-ryzen-5600g.json`; the harness and
+methodology are documented in `porfirevich-original/BENCHMARKING.md`.
+
+An unsupported native `gfx90c` ROCm experiment succeeded after increasing the
+5600G's BIOS UMA allocation to 16 GiB. The otherwise identical five-round Vega
+benchmark averaged 1.655 seconds and 27.19 requested tokens/second: 1.93 times
+the CPU throughput and 48.2% lower steady-state latency. GPU model loading was
+much slower, and smaller UMA allocations caused GPU resets or complete machine
+freezes. Exact failures, package versions, and the successful configuration are
+recorded in `porfirevich-original/ROCM-EXPERIMENT.md`.
+
 ## Local extensions, not historical behavior
 
 The iterative picker and `--auto-select` modes are local conveniences. They do

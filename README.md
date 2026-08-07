@@ -39,6 +39,9 @@ See [FINDINGS.md](FINDINGS.md) for the evidence and current recovery status,
 and [porfirevich-original/README.md](porfirevich-original/README.md) for all
 runner options.
 
+For repeatable CPU/GPU performance comparisons, see
+[porfirevich-original/BENCHMARKING.md](porfirevich-original/BENCHMARKING.md).
+
 ## Repository layout
 
 - `IDEA.md`: original investigation brief

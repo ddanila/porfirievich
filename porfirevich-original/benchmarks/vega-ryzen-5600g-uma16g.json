@@ -1,0 +1,67 @@
+{
+  "benchmark_version": 1,
+  "timestamp_utc": "2026-08-07T19:00:49.831912+00:00",
+  "runtime": {
+    "python": "3.12.13",
+    "torch": "2.12.0+rocm7.15.0a20260728",
+    "transformers": "4.57.6",
+    "youtokentome": "1.0.6",
+    "torch_cuda": null,
+    "torch_hip": "7.15.0"
+  },
+  "device": {
+    "requested": "cuda",
+    "resolved": "cuda",
+    "name": "AMD Radeon Graphics",
+    "cpu_threads": 6,
+    "gpu_memory": {
+      "allocated_bytes": 1478025216,
+      "peak_allocated_bytes": 1515405312
+    }
+  },
+  "workload": {
+    "prompt": "Однажды вечером",
+    "prompt_tokens": 2,
+    "length": 15,
+    "num_samples": 3,
+    "generated_tokens_per_run": 45,
+    "profile": "latest-site",
+    "allow_linebreak": false,
+    "seed_reset_each_run": 42,
+    "sampler": "original-uncached"
+  },
+  "model_load_seconds": 14.388341,
+  "warmup_seconds": [
+    2.575641
+  ],
+  "run_seconds": [
+    1.655844,
+    1.654441,
+    1.656082,
+    1.65385,
+    1.654972
+  ],
+  "summary": {
+    "runs": 5,
+    "mean_seconds": 1.655038,
+    "median_seconds": 1.654972,
+    "min_seconds": 1.65385,
+    "max_seconds": 1.656082,
+    "population_stdev_seconds": 0.000838,
+    "mean_generated_tokens_per_second": 27.18971,
+    "outputs_identical": true
+  },
+  "output_sha256": [
+    "c12936e8f74e967119d5455d59c58f483dc41bc1ff4680ec325f1c0d71adb77a",
+    "c12936e8f74e967119d5455d59c58f483dc41bc1ff4680ec325f1c0d71adb77a",
+    "c12936e8f74e967119d5455d59c58f483dc41bc1ff4680ec325f1c0d71adb77a",
+    "c12936e8f74e967119d5455d59c58f483dc41bc1ff4680ec325f1c0d71adb77a",
+    "c12936e8f74e967119d5455d59c58f483dc41bc1ff4680ec325f1c0d71adb77a"
+  ],
+  "sample_replies": [
+    " Компания.",
+    " прозвали Люси и потому что эта девушка неожиданно появилась на белом фургоне с надписью",
+    " Приходящая стала Скандинавской, по аналогии с Анной,"
+  ],
+  "process_peak_rss_kib": 2543468
+}

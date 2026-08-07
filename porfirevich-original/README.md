@@ -68,10 +68,32 @@ To reproduce the source as it stood when this checkpoint was uploaded:
 Use `./porfirevich-original/run.sh --help` for all options. CPU generation uses
 the original uncached sampling loop and can be slow.
 
+## Benchmark
+
+Run a repeatable five-round CPU baseline:
+
+```bash
+./porfirevich-original/benchmark.sh \
+  --device cpu \
+  --threads 6 \
+  --warmup 1 \
+  --runs 5
+```
+
+See `BENCHMARKING.md` for saved JSON reports and an identical ROCm workload.
+The experimental Ryzen 5 5600G Vega setup is reproducible with
+`setup_rocm_experimental.sh`, but requires the documented 16 GiB BIOS UMA
+allocation. Read `ROCM-EXPERIMENT.md` first; this GPU is unsupported by AMD's
+production ROCm matrix.
+
 ## Contents
 
 - `model/m_checkpoint-3365357/`: untouched original S3 objects
 - `download_original.sh`: resumable download with SHA-256 verification
+- `benchmark.py` / `benchmark.sh`: repeatable CPU or ROCm performance harness
+- `BENCHMARKING.md`: benchmark methodology and comparison instructions
+- `ROCM-EXPERIMENT.md`: Vega setup, failures, UMA requirements, and results
+- `setup_rocm_experimental.sh`: pinned native `gfx90c` environment setup
 - `original-inference-code/`: complete unchanged upstream Git clone
 - `run_cpu.py`: modern CPU port preserving the original algorithm
 - `environment-lock.txt`: exact package versions used for verified outputs
