@@ -1,0 +1,8 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+Cython==3.2.9
+setuptools==83.0.0
+wheel==0.47.0
+torch==2.13.0+cpu
+transformers==4.57.6
+regex==2026.7.19
+youtokentome==1.0.6

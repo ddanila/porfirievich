@@ -1,0 +1,6 @@
+.venv/
+**/__pycache__/
+*.py[cod]
+
+# Preserve locally, but do not put the 1.7 GB artifact in ordinary Git.
+porfirevich-original/model/m_checkpoint-3365357/pytorch_model.bin

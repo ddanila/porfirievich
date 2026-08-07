@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+archive_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+workspace_dir="$(cd -- "${archive_dir}/.." && pwd)"
+python_path="${workspace_dir}/.venv/bin/python"
+
+if [[ ! -x "${python_path}" ]]; then
+  echo "Missing ${python_path}; create the environment described in requirements-cpu.txt." >&2
+  exit 1
+fi
+
+exec env PYTHONDONTWRITEBYTECODE=1 \
+  "${python_path}" "${archive_dir}/run_cpu.py" "$@"

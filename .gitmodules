@@ -1,0 +1,3 @@
+[submodule "porfirevich-original/original-inference-code"]
+	path = porfirevich-original/original-inference-code
+	url = https://github.com/mgrankin/ru_transformers.git
