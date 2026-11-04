@@ -8,8 +8,10 @@ The small selected edit raises a paired surreal-prose likelihood score on both
 ungrammatical phrases, abrupt changes of subject, and disconnected images.
 The selected edit worsens ordinary-prose perplexity by approximately 5.6% on
 four held-out passages. It is experimental and is **not enabled by default**.
-Human preference is pending; this pilot does not establish a reliable
-“surreal but sane” control.
+In a subsequent blind comparison, the user preferred the candidate on both
+shown prompts, describing it as “surreal but rather consistent.” This is
+encouraging personal-preference evidence, but the pilot does not establish a
+reliable general-purpose “surreal but sane” control.
 
 The original checkpoint and its config/tokenizer/metadata were verified against
 `SHA256SUMS` after the experiment. No original model file was edited. Each
@@ -96,9 +98,16 @@ candidate is a useful reversible test artifact, not a recommended replacement.
 
 One selected development prompt/seed was shown to the user with variant names
 hidden. This is a small preference elicitation, not a blinded randomized study.
-The label key and response status are in `human-review.json`; do not use that
-one example to claim general superiority. All eight generations for each
-variant are in `discovery.json` and `test.json`.
+That development question was not answered. A subsequent comparison used two
+held-out prompts (library and market), seed 137, and three variants: baseline,
+temperature 0.85, and the candidate. Labels were shuffled independently per set
+using Random(60193), and identities were withheld until after the response.
+The user chose 1B and 2B, both the candidate: “surreal but rather consistent.”
+This is two preferences from one person at one seed, not statistical evidence
+of general superiority. The full samples, label key, and verbatim response are
+in `human-review.json`. All eight generations for each variant are in
+`discovery.json` and `test.json`. Future tuning must use new evaluation prompts
+if the current feedback informs the next edit.
 
 ## Try or reproduce
 
@@ -133,7 +142,7 @@ baseline matches the archival original sampler, patch tests reject invalid
 layers/shapes/nonfinite values/checkpoint hashes before changing parameters,
 and checkpoint bytes remain unchanged. The ordinary sampling tests also pass.
 
-Next useful step: obtain human ratings across several prompts and construct
+Next useful step: extend blind human ratings to more prompts and seeds, and construct
 more varied, tightly matched contrast pairs if this style axis is worth
 pursuing. A second coherence direction or a small curated fine-tune would be
 separate experiments, not established fixes from this pilot.
