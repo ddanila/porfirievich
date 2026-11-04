@@ -35,6 +35,12 @@ Quick benchmark of three rounds of automatic random selection:
 
 Use `--device cpu` with the same settings to compare CPU speed.
 
+Sampling controls are optional: `--temperature 1.0 --top-p 0.9` preserves the
+original defaults. Temperature below 1 favors more likely tokens; above 1 makes
+choices more varied. Top-p keeps the smallest set of likely tokens whose total
+probability reaches the chosen cutoff, after temperature is applied. See the
+[runner documentation](porfirevich-original/README.md#sampling-controls) for examples.
+
 The default `--sampler optimized` uses full-precision KV caching and GPU-friendly
 filtering. Use `--sampler original` in either command to reproduce the archival
 uncached loop. Both use the same weights, tokenizer, nucleus threshold, and

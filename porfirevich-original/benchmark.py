@@ -21,6 +21,8 @@ from importlib.metadata import version
 
 from run_cpu import (
     DEFAULT_MODEL,
+    add_sampling_args,
+    validate_sampling_args,
     OriginalYTEncoder,
     build_filters,
     generate_replies,
@@ -37,6 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Benchmark repeatable Porfirievich completion rounds.",
     )
+    add_sampling_args(parser)
     parser.add_argument("--device", choices=("cpu", "cuda", "mps", "auto"), default="cpu")
     parser.add_argument("--iterations", type=int, default=1, help="continuation rounds per run")
     parser.add_argument("--auto-select", choices=("first", "random", "longest"), default="random")
@@ -83,6 +86,7 @@ def output_hash(replies: object) -> str:
 
 
 def validate_args(args: argparse.Namespace) -> None:
+    validate_sampling_args(args)
     if args.iterations < 1:
         raise SystemExit("--iterations must be at least 1")
     if args.runs < 1:
@@ -152,6 +156,8 @@ def main() -> None:
                 newline_token=newline_token,
                 device=device,
                 sampler=args.sampler,
+                temperature=args.temperature,
+                top_p=args.top_p,
             )
             selected = select_reply_index(replies, args.auto_select, selection_rng)
             prompt += replies[selected]
@@ -213,6 +219,8 @@ def main() -> None:
             "allow_linebreak": args.allow_linebreak,
             "seed_reset_each_run": args.seed,
             "sampler": args.sampler,
+            "temperature": args.temperature,
+            "top_p": args.top_p,
         },
         "model_load_seconds": round(model_load_seconds, 6),
         "warmup_seconds": [round(item, 6) for item in warmup_seconds],

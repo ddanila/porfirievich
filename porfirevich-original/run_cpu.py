@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 import random
 
@@ -92,6 +93,8 @@ def sample_sequence(
     filter_single: list[int],
     filter_double: list[int],
     device: torch.device | str = "cpu",
+    temperature: float = 1.0,
+    top_p: float = 0.9,
 ) -> torch.Tensor:
     """Original sampling loop, intentionally without a modern KV-cache rewrite."""
     context_tensor = torch.tensor(context, dtype=torch.long, device=device)
@@ -102,14 +105,14 @@ def sample_sequence(
             outputs = model(input_ids=generated[:, -1023:])
             next_tokens = torch.zeros(num_samples, dtype=torch.long, device=device)
             for sample_index in range(num_samples):
-                next_token_logits = outputs[0][sample_index, -1, :] / 1.0
+                next_token_logits = outputs[0][sample_index, -1, :] / temperature
                 next_token_logits[filter_single] = FILTER_VALUE
                 if generated[sample_index, -1] in filter_double:
                     next_token_logits[generated[sample_index, -1]] = FILTER_VALUE
                 filtered_logits = top_k_top_p_filtering(
                     next_token_logits,
                     top_k=0,
-                    top_p=0.9,
+                    top_p=top_p,
                 )
                 next_tokens[sample_index] = torch.multinomial(
                     F.softmax(filtered_logits, dim=-1),
@@ -153,6 +156,7 @@ def filter_logits_batched(
     previous_tokens: torch.Tensor,
     filter_single: list[int],
     filter_double: list[int],
+    top_p: float = 0.9,
 ) -> torch.Tensor:
     """Original masks and nucleus threshold without GPU-to-Python branches."""
     logits[:, filter_single] = FILTER_VALUE
@@ -160,7 +164,7 @@ def filter_logits_batched(
         logits[:, token].masked_fill_(previous_tokens == token, FILTER_VALUE)
     sorted_logits, sorted_indices = torch.sort(logits, descending=True, dim=-1)
     cumulative_probs = F.softmax(sorted_logits, dim=-1).cumsum(dim=-1)
-    remove = cumulative_probs > 0.9
+    remove = cumulative_probs > top_p
     remove[:, 1:] = remove[:, :-1].clone()
     remove[:, 0] = False
     # A fixed-size scatter avoids the dynamic boolean-index result that forces
@@ -177,6 +181,8 @@ def sample_sequence_optimized(
     filter_single: list[int],
     filter_double: list[int],
     device: torch.device | str = "cpu",
+    temperature: float = 1.0,
+    top_p: float = 0.9,
 ) -> torch.Tensor:
     generated = torch.empty((num_samples, len(context) + length), dtype=torch.long, device=device)
     generated[:, :len(context)] = torch.tensor(context, dtype=torch.long, device=device)
@@ -184,7 +190,9 @@ def sample_sequence_optimized(
     with torch.inference_mode():
         for position in range(len(context), len(context) + length):
             logits = forward(generated[:, :position])
-            logits = filter_logits_batched(logits, generated[:, position - 1], filter_single, filter_double)
+            if temperature != 1.0:
+                logits.div_(temperature)
+            logits = filter_logits_batched(logits, generated[:, position - 1], filter_single, filter_double, top_p=top_p)
             # Keep one draw per candidate, in the original order, so this
             # optimization does not intentionally alter RNG consumption.
             for sample_index in range(num_samples):
@@ -216,6 +224,8 @@ def generate_replies(
     newline_token: list[int],
     device: torch.device | str = "cpu",
     sampler: str = "optimized",
+    temperature: float = 1.0,
+    top_p: float = 0.9,
 ) -> list[str]:
     context_tokens = tokenizer.encode(prompt)
     sample = sample_sequence_optimized if sampler == "optimized" else sample_sequence
@@ -227,6 +237,8 @@ def generate_replies(
         filter_single=filter_single,
         filter_double=newline_token,
         device=device,
+        temperature=temperature,
+        top_p=top_p,
     ).to("cpu")
 
     decoded_prompt_length = len(tokenizer.decode(context_tokens))
@@ -315,10 +327,25 @@ def pick_reply(
         print(f"Please enter a number from 1 to {len(replies)}.")
 
 
+def add_sampling_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--temperature", type=float, default=1.0,
+                        help="probability scaling: below 1 is more predictable, above 1 more varied (default: 1.0)")
+    parser.add_argument("--top-p", type=float, default=0.9,
+                        help="cumulative probability cutoff after temperature; (0, 1], 1 keeps the full distribution (default: 0.9)")
+
+
+def validate_sampling_args(args: argparse.Namespace) -> None:
+    if not math.isfinite(args.temperature) or args.temperature <= 0:
+        raise SystemExit("--temperature must be finite and greater than 0")
+    if not math.isfinite(args.top_p) or not 0 < args.top_p <= 1:
+        raise SystemExit("--top-p must be finite and in (0, 1]")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Complete Russian prose with the original Porfirievich checkpoint.",
     )
+    add_sampling_args(parser)
     parser.add_argument("prompt", help="Russian text to continue")
     parser.add_argument("--length", type=int, default=15, help="tokens per completion")
     parser.add_argument("--num-samples", type=int, default=3)
@@ -364,6 +391,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    validate_sampling_args(args)
     if args.length < 1:
         raise SystemExit("--length must be at least 1")
     if args.iterations is not None and args.iterations < 1:
@@ -408,6 +436,8 @@ def main() -> None:
             newline_token=newline_token,
             device=device,
             sampler=args.sampler,
+            temperature=args.temperature,
+            top_p=args.top_p,
         )
         print(json.dumps({"replies": replies}, ensure_ascii=False, indent=2))
         return
@@ -426,6 +456,8 @@ def main() -> None:
             newline_token=newline_token,
             device=device,
             sampler=args.sampler,
+            temperature=args.temperature,
+            top_p=args.top_p,
         )
         accumulated_text += pick_reply(
             replies,

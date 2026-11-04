@@ -84,6 +84,31 @@ cache. At the original 1,023-token input limit, the cache is rebuilt on every
 sliding-window step so absolute positions and discarded context behave exactly
 as in the reference algorithm.
 
+## Sampling controls
+
+Both `run.sh` and `benchmark.sh` accept these options for either sampler:
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `--temperature` | `1.0` | Scales logits before computing probabilities. Below 1 favors likely tokens; above 1 increases variety. Must be finite and greater than 0. |
+| `--top-p` | `0.9` | Keeps the smallest set of most likely tokens whose cumulative probability reaches this cutoff. Must be in `(0, 1]`; 1 disables nucleus truncation. |
+
+These are different controls, not two temperatures. Temperature first adjusts
+probabilities; top-p then removes the unlikely tail before a token is sampled.
+At temperature 1.0, logits are unchanged. The defaults preserve the recovered
+service's behavior. Smaller top-p values restrict choices further; larger values
+allow more of the tail. Higher variety can also reduce coherence.
+
+```bash
+./porfirevich-original/run.sh 'Однажды вечером' \
+  --device mps --iterations 5 --auto-select random \
+  --temperature 0.8 --top-p 0.9
+```
+
+`--auto-select random` independently chooses among completed candidates; these
+sampling controls affect how each candidate is generated. Neither changes the
+weights or the existing profile-specific token and linebreak filters.
+
 ## Benchmark
 
 On Apple Silicon, add `--device mps` to `run.sh` or `benchmark.sh` to use the GPU.

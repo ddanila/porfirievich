@@ -4,6 +4,12 @@ The benchmark loads the untouched checkpoint once, performs unmeasured warmup
 rounds, then runs the same generation workload repeatedly. It resets the model
 sampling seed before every round and records hashes of all outputs.
 
+Both samplers accept `--temperature` (default `1.0`, finite and greater than 0)
+and `--top-p` (default `0.9`, in `(0, 1]`). Temperature scales logits first;
+top-p then truncates the low-probability tail. Benchmark JSON records both under
+`workload`; keep them equal when comparing devices or samplers. Existing archived
+reports without these fields used the defaults.
+
 ## Standard CPU baseline
 
 ```bash
