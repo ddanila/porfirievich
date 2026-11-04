@@ -80,6 +80,11 @@ but no established writing-quality improvement. The original weights are
 unchanged; the candidate patch is opt-in via `--style-patch` and is not a new
 default model.
 
+A separate [read-only Капустин tracing experiment](porfirevich-original/experiments/kapustin-trace/README.md)
+maps which activations influence the name in the untouched model. It finds
+context-dependent contributors, not a unique character neuron, and includes
+layer plots, control comparisons, and before/after integrity hashes.
+
 - `IDEA.md`: original investigation brief
 - `FINDINGS.md`: confirmed results, inferences, and remaining questions
 - `porfirevich-original/model/`: original model artifacts (large weights ignored by Git)

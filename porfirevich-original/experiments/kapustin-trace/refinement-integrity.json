@@ -1,0 +1,7 @@
+{
+  "parameter_sha256_before": "9945e44677008d4343f5e272df08e00afe21e3d9707f3155682f20b04a66d214",
+  "parameter_sha256_after": "9945e44677008d4343f5e272df08e00afe21e3d9707f3155682f20b04a66d214",
+  "checkpoint_sha256": "c508fdf6db765a4b1cf11380038233d7bd969ce17a8055368a9095c6dc10089d",
+  "restored_logp_error": 0.0,
+  "passed": true
+}
