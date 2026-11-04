@@ -14,7 +14,7 @@ download() {
   local actual_size=0
 
   if [[ -f "${destination}" ]]; then
-    actual_size="$(stat --format=%s "${destination}")"
+    actual_size="$(wc -c < "${destination}" | tr -d '[:space:]')"
   fi
   if [[ "${actual_size}" == "${expected_size}" ]]; then
     echo "Already complete: ${filename}"
@@ -38,4 +38,8 @@ download step.txt 7
 download training_args.bin 1420
 
 cd "${archive_dir}"
-sha256sum --check SHA256SUMS
+if command -v sha256sum >/dev/null; then
+  sha256sum --check SHA256SUMS
+else
+  shasum -a 256 --check SHA256SUMS
+fi

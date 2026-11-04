@@ -13,6 +13,13 @@ Download the checkpoint, create the local environment, and run a completion:
 ./porfirevich-original/run.sh 'Однажды вечером' --length 15
 ```
 
+The setup and download scripts support Linux and macOS. On macOS, use a current
+Homebrew Python and install the Xcode command-line tools for the YouTokenToMe C++
+extension. Setup automatically looks for Homebrew Python if the system Python is
+too old; `PYTHON=/path/to/python3 ./porfirevich-original/setup_cpu.sh` overrides it.
+The pinned `requirements-cpu.txt` and `environment-lock.txt` describe the Linux
+environment; use `setup_cpu.sh` on macOS to select its PyTorch wheel.
+
 Add `--seed 42` for repeatable local tests. Omitting it more closely matches
 the public service, which did not reset its random seed per request.
 

@@ -19,6 +19,13 @@ git submodule update --init --recursive
 ./porfirevich-original/run.sh 'Однажды вечером'
 ```
 
+On macOS, install a current Python and the Xcode command-line tools first
+(`brew install python` and `xcode-select --install`, if needed). The same commands
+above work on Apple Silicon: setup detects Homebrew Python when Apple's system
+Python is too old and installs the macOS PyTorch wheel. You can choose an
+interpreter explicitly with `PYTHON=/path/to/python3 ./porfirevich-original/setup_cpu.sh`.
+Generation defaults to CPU; Apple GPU acceleration is not enabled.
+
 Interactive continuation building:
 
 ```bash
