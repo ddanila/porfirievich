@@ -11,6 +11,8 @@ autoregressive completer; no chat template or instruction tuning is added.
 ## Quick start
 
 ```bash
+git clone --recurse-submodules https://github.com/ddanila/porfirievich.git
+cd porfirievich
 git submodule update --init --recursive
 ./porfirevich-original/download_original.sh
 ./porfirevich-original/setup_cpu.sh
@@ -54,3 +56,17 @@ For repeatable CPU/GPU performance comparisons, see
 The 1.7 GB `pytorch_model.bin` remains in the local working tree but is ignored
 by ordinary Git. Its exact SHA-256 and S3 multipart ETag are committed, and
 `download_original.sh` restores and verifies it on a fresh checkout.
+
+## Credits and licensing
+
+The original **Porfirievich / «Порфирьевич» model and Russian GPT-2 project
+were created by Mikhail Grankin**. The original source is
+[mgrankin/ru_transformers](https://github.com/mgrankin/ru_transformers), preserved
+here as an unchanged, pinned submodule with its license and copyright notices.
+
+This repository contains archival recovery work, instructions, a modern
+compatibility runner, and CPU/Vega benchmarks maintained by
+[ddanila](https://github.com/ddanila). It is an independent preservation project.
+See [CREDITS.md](CREDITS.md) for upstream attribution and the scope of the
+[Apache License 2.0](LICENSE). The model and tokenizer retain their original
+provenance; this repository does not assign them a new license.

@@ -1,5 +1,8 @@
 # Porfirievich: investigation and recovery task
 
+Historical investigation brief, retained for context. For completed recovery
+results and current instructions, see [FINDINGS.md](FINDINGS.md) and [README.md](README.md).
+
 I want to investigate and, ideally, locally run the original Russian text-generation model **«Порфирьевич» (Porfirievich)** created by Mikhail Grankin around 2019.
 
 The goal is **not** merely to find a modern Russian GPT model or something vaguely similar. I specifically want to recover the original Porfirievich model if possible, together with its tokenizer and generation settings, and reproduce its characteristic text-completion behaviour.
