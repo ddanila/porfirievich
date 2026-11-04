@@ -386,6 +386,8 @@ def parse_args() -> argparse.Namespace:
         help="execution device; Apple GPU uses 'mps', ROCm uses 'cuda'",
     )
     parser.add_argument("--model", type=Path, default=DEFAULT_MODEL)
+    parser.add_argument("--style-patch", type=Path,
+                        help="explicit experimental JSON bias patch; original checkpoint remains untouched")
     return parser.parse_args()
 
 
@@ -417,6 +419,10 @@ def main() -> None:
     )
     model.to(device)
     model.eval()
+
+    if args.style_patch is not None:
+        from style_patch import apply_style_patch
+        apply_style_patch(model, args.model, args.style_patch)
 
     filter_single, newline_token = build_filters(
         tokenizer,

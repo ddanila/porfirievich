@@ -1,0 +1,11 @@
+{
+  "status": "pending",
+  "prompt": "В комнате стоял старый шкаф.",
+  "seed": 137,
+  "labels": {
+    "A": "temperature-0.85",
+    "B": "layer7-strength0.5",
+    "C": "baseline"
+  },
+  "note": "One selected development example, not a randomized preference study; all text is unedited."
+}

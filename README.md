@@ -74,6 +74,12 @@ For repeatable CPU/GPU performance comparisons, see
 
 ## Repository layout
 
+An exploratory [surreal-but-coherent style experiment](porfirevich-original/experiments/surreal-sane/README.md)
+tests reversible, gradient-free bias edits. It found a numerical style shift,
+but no established writing-quality improvement. The original weights are
+unchanged; the candidate patch is opt-in via `--style-patch` and is not a new
+default model.
+
 - `IDEA.md`: original investigation brief
 - `FINDINGS.md`: confirmed results, inferences, and remaining questions
 - `porfirevich-original/model/`: original model artifacts (large weights ignored by Git)
