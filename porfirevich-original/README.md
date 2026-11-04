@@ -77,6 +77,20 @@ the original uncached sampling loop and can be slow.
 
 ## Benchmark
 
+On Apple Silicon, add `--device mps` to `run.sh` or `benchmark.sh` to use the GPU.
+`--device auto` prefers CUDA/ROCm, then MPS, then CPU; the default remains CPU.
+Seeds are repeatable within a runtime, but CPU and GPU can generate different text.
+
+Measure a growing story with automatic random selection:
+
+```bash
+./porfirevich-original/benchmark.sh \
+  --device mps --iterations 3 --auto-select random --runs 2 --seed 42
+```
+
+This reports time per full run, per iteration, and generated-token throughput,
+with model loading and warmup reported separately. Swap `mps` for `cpu` to compare.
+
 Run a repeatable five-round CPU baseline:
 
 ```bash

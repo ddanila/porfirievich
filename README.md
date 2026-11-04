@@ -24,7 +24,16 @@ On macOS, install a current Python and the Xcode command-line tools first
 above work on Apple Silicon: setup detects Homebrew Python when Apple's system
 Python is too old and installs the macOS PyTorch wheel. You can choose an
 interpreter explicitly with `PYTHON=/path/to/python3 ./porfirevich-original/setup_cpu.sh`.
-Generation defaults to CPU; Apple GPU acceleration is not enabled.
+Generation defaults to CPU. Add `--device mps` for the Apple GPU, or `--device auto`
+to prefer an available CUDA/ROCm GPU, then MPS, then CPU.
+
+Quick benchmark of three rounds of automatic random selection:
+
+```bash
+./porfirevich-original/benchmark.sh --device mps --iterations 3 --auto-select random --runs 2
+```
+
+Use `--device cpu` with the same settings to compare CPU speed.
 
 Interactive continuation building:
 

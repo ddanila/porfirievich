@@ -162,7 +162,11 @@ def generate_replies(
 
 def resolve_device(requested: str) -> torch.device:
     if requested == "auto":
-        requested = "cuda" if torch.cuda.is_available() else "cpu"
+        requested = "cuda" if torch.cuda.is_available() else (
+            "mps" if torch.backends.mps.is_available() else "cpu"
+        )
+    if requested == "mps" and not torch.backends.mps.is_available():
+        raise SystemExit("Apple GPU (MPS) is not available; use --device cpu.")
     if requested == "cuda" and not torch.cuda.is_available():
         raise SystemExit(
             "CUDA/ROCm is not available in this PyTorch environment; use --device cpu."
@@ -174,6 +178,8 @@ def seed_runtime(seed: int, device: torch.device) -> None:
     torch.manual_seed(seed)
     if device.type == "cuda":
         torch.cuda.manual_seed_all(seed)
+    elif device.type == "mps":
+        torch.mps.manual_seed(seed)
 
 
 def build_filters(
@@ -190,6 +196,16 @@ def build_filters(
     return filter_single, newline_token
 
 
+def select_reply_index(replies: list[str], strategy: str, rng: random.Random) -> int:
+    if strategy == "first":
+        return 0
+    if strategy == "random":
+        return rng.randrange(len(replies))
+    if strategy == "longest":
+        return max(range(len(replies)), key=lambda index: len(replies[index]))
+    raise ValueError(f"Unknown selection strategy: {strategy}")
+
+
 def pick_reply(
     replies: list[str],
     iteration: int,
@@ -202,12 +218,7 @@ def pick_reply(
         print(f"  {index}. {reply}")
 
     if auto_select is not None:
-        if auto_select == "first":
-            selected_index = 0
-        elif auto_select == "random":
-            selected_index = selection_rng.randrange(len(replies))
-        else:
-            selected_index = max(range(len(replies)), key=lambda index: len(replies[index]))
+        selected_index = select_reply_index(replies, auto_select, selection_rng)
         print(f"Auto-selected {selected_index + 1} ({auto_select}).")
         return replies[selected_index]
 
@@ -264,9 +275,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--threads", type=int, help="PyTorch CPU worker threads")
     parser.add_argument(
         "--device",
-        choices=("cpu", "cuda", "auto"),
+        choices=("cpu", "cuda", "mps", "auto"),
         default="cpu",
-        help="execution device; ROCm-backed PyTorch also uses 'cuda'",
+        help="execution device; Apple GPU uses 'mps', ROCm uses 'cuda'",
     )
     parser.add_argument("--model", type=Path, default=DEFAULT_MODEL)
     return parser.parse_args()

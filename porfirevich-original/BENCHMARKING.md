@@ -53,6 +53,49 @@ The complete machine-readable reports are
 [`benchmarks/cpu-ryzen-5600g.json`](benchmarks/cpu-ryzen-5600g.json) and
 [`benchmarks/vega-ryzen-5600g-uma16g.json`](benchmarks/vega-ryzen-5600g-uma16g.json).
 
+## Apple GPU and automatic continuation
+
+Use `--device mps` for Apple Silicon GPU execution. `--device auto` chooses
+CUDA/ROCm first, then MPS, then CPU. GPU timing includes synchronization.
+
+```bash
+./porfirevich-original/benchmark.sh \
+  --device mps --iterations 3 --auto-select random \
+  --warmup 1 --runs 2 --seed 42 \
+  --output porfirevich-original/benchmarks/mps-random.json
+```
+
+Repeat with `--device cpu` and a different output filename to compare.
+Each run starts from the original prompt and resets both the model seed and the
+independent selection RNG. Within a run, the selected continuation is appended
+to the prompt for the next iteration, just like `run.sh --iterations`.
+`first` and `longest` selection are also supported.
+
+Reports contain full-run timings, average seconds per iteration, and each
+iteration's time, context length, candidates, and selected branch. Throughput
+counts all generated candidate tokens before website trimming, not just the
+selected continuation: the example generates 3 × 3 × 15 = 135 tokens per run.
+Model load, warmup, and terminal output are excluded from measured run time.
+`outputs_identical` compares text and selections, excluding timing fields.
+
+On this M3 Pro (12 CPU cores, 18 GPU cores, 36 GB unified memory), the small
+three-iteration random-selection benchmark produced:
+
+| Metric | CPU (6 threads) | Apple GPU (MPS) |
+| --- | ---: | ---: |
+| Measured runs after one warmup | 2 | 2 |
+| Mean full run | 5.475 s | 1.149 s |
+| Mean per iteration | 1.825 s | 0.383 s |
+| Generated candidate tokens/s | 24.66 | 117.44 |
+| Repeated outputs identical | yes | yes |
+
+This is about 4.8× faster on MPS for this short workload, not a general speed
+guarantee. CPU and MPS generate different text, so later context lengths can
+differ even with the same seed. Longer stories cost more with the original
+uncached sampler. Reports:
+[`cpu-m3-pro-random.json`](benchmarks/cpu-m3-pro-random.json) and
+[`mps-m3-pro-random.json`](benchmarks/mps-m3-pro-random.json).
+
 ## AMD/ROCm comparison
 
 ROCm-backed PyTorch exposes AMD GPUs through PyTorch's `cuda` API. With a

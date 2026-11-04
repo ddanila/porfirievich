@@ -1,0 +1,133 @@
+{
+  "benchmark_version": 2,
+  "timestamp_utc": "2026-11-04T14:48:36.195703+00:00",
+  "runtime": {
+    "python": "3.14.7",
+    "torch": "2.13.0",
+    "transformers": "4.57.6",
+    "youtokentome": "1.0.6",
+    "torch_cuda": null,
+    "torch_hip": null
+  },
+  "device": {
+    "requested": "cpu",
+    "resolved": "cpu",
+    "name": "Apple M3 Pro",
+    "cpu_threads": 6,
+    "gpu_memory": null
+  },
+  "workload": {
+    "iterations": 3,
+    "auto_select": "random",
+    "prompt": "Однажды вечером",
+    "prompt_tokens": 2,
+    "length": 15,
+    "num_samples": 3,
+    "generated_tokens_per_run": 135,
+    "profile": "latest-site",
+    "allow_linebreak": false,
+    "seed_reset_each_run": 42,
+    "sampler": "original-uncached"
+  },
+  "model_load_seconds": 0.520273,
+  "warmup_seconds": [
+    5.584004
+  ],
+  "run_seconds": [
+    5.462291,
+    5.48692
+  ],
+  "summary": {
+    "runs": 2,
+    "mean_seconds_per_iteration": 1.824868,
+    "mean_seconds": 5.474605,
+    "median_seconds": 5.474605,
+    "min_seconds": 5.462291,
+    "max_seconds": 5.48692,
+    "population_stdev_seconds": 0.012314,
+    "mean_generated_tokens_per_second": 24.659312,
+    "outputs_identical": true
+  },
+  "output_sha256": [
+    "a6557bff88c1143ddd79fd015997aa824c58fe8e303ca2ccd4e526b773b7966d",
+    "a6557bff88c1143ddd79fd015997aa824c58fe8e303ca2ccd4e526b773b7966d"
+  ],
+  "sample_replies": [
+    " другие теперь господствовали в Сиэтле.",
+    " Человеку жилось хорошо; жил он успешно, не болел.",
+    " - потому что эта песня всегда была в ее жизни."
+  ],
+  "iteration_runs": [
+    {
+      "rounds": [
+        {
+          "seconds": 1.462925,
+          "context_tokens": 2,
+          "selected_candidate": 3,
+          "replies": [
+            " другие теперь господствовали в Сиэтле.",
+            " Человеку жилось хорошо; жил он успешно, не болел.",
+            " - потому что эта песня всегда была в ее жизни."
+          ]
+        },
+        {
+          "seconds": 1.809469,
+          "context_tokens": 12,
+          "selected_candidate": 1,
+          "replies": [
+            " Но я знал - ее выбросят за ненадобностью.",
+            " Так и вышла на «День матери» и еще один вариант - «Офицер",
+            " И в ее сердце."
+          ]
+        },
+        {
+          "seconds": 2.18979,
+          "context_tokens": 23,
+          "selected_candidate": 1,
+          "replies": [
+            " Вот сейчас - ей пришел конец.",
+            " В ее первый вариант вставили ту часть, где говорилось про мальчика, который так и",
+            " И никто из этих жестоких вурдалаков не обратит внимания."
+          ]
+        }
+      ],
+      "final_text": "Однажды вечером - потому что эта песня всегда была в ее жизни. Но я знал - ее выбросят за ненадобностью. Вот сейчас - ей пришел конец."
+    },
+    {
+      "rounds": [
+        {
+          "seconds": 1.422508,
+          "context_tokens": 2,
+          "selected_candidate": 3,
+          "replies": [
+            " другие теперь господствовали в Сиэтле.",
+            " Человеку жилось хорошо; жил он успешно, не болел.",
+            " - потому что эта песня всегда была в ее жизни."
+          ]
+        },
+        {
+          "seconds": 1.839202,
+          "context_tokens": 12,
+          "selected_candidate": 1,
+          "replies": [
+            " Но я знал - ее выбросят за ненадобностью.",
+            " Так и вышла на «День матери» и еще один вариант - «Офицер",
+            " И в ее сердце."
+          ]
+        },
+        {
+          "seconds": 2.225091,
+          "context_tokens": 23,
+          "selected_candidate": 1,
+          "replies": [
+            " Вот сейчас - ей пришел конец.",
+            " В ее первый вариант вставили ту часть, где говорилось про мальчика, который так и",
+            " И никто из этих жестоких вурдалаков не обратит внимания."
+          ]
+        }
+      ],
+      "final_text": "Однажды вечером - потому что эта песня всегда была в ее жизни. Но я знал - ее выбросят за ненадобностью. Вот сейчас - ей пришел конец."
+    }
+  ],
+  "process_peak_rss_kib": 2530048.0
+}
