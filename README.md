@@ -35,6 +35,12 @@ Quick benchmark of three rounds of automatic random selection:
 
 Use `--device cpu` with the same settings to compare CPU speed.
 
+The default `--sampler optimized` uses full-precision KV caching and GPU-friendly
+filtering. Use `--sampler original` in either command to reproduce the archival
+uncached loop. Both use the same weights, tokenizer, nucleus threshold, and
+selection rules. Exact seeded text can differ slightly across execution paths
+or devices because of floating-point rounding.
+
 Interactive continuation building:
 
 ```bash

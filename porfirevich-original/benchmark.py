@@ -47,6 +47,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--length", type=int, default=15)
     parser.add_argument("--num-samples", type=int, default=3)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--sampler", choices=("original", "optimized"), default="optimized")
     parser.add_argument(
         "--profile",
         choices=("checkpoint-era", "latest-site"),
@@ -150,6 +151,7 @@ def main() -> None:
                 filter_single=filter_single,
                 newline_token=newline_token,
                 device=device,
+                sampler=args.sampler,
             )
             selected = select_reply_index(replies, args.auto_select, selection_rng)
             prompt += replies[selected]
@@ -210,7 +212,7 @@ def main() -> None:
             "profile": args.profile,
             "allow_linebreak": args.allow_linebreak,
             "seed_reset_each_run": args.seed,
-            "sampler": "original-uncached",
+            "sampler": args.sampler,
         },
         "model_load_seconds": round(model_load_seconds, 6),
         "warmup_seconds": [round(item, 6) for item in warmup_seconds],

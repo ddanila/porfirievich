@@ -1,0 +1,112 @@
+{
+  "device": "mps",
+  "dtype": "float32",
+  "prediction_checks": [
+    {
+      "context_tokens": 3,
+      "max_probability_error": 0.0,
+      "total_variation": 0.0,
+      "argmax_equal": true
+    },
+    {
+      "context_tokens": 4,
+      "max_probability_error": 0.0,
+      "total_variation": 0.0,
+      "argmax_equal": true
+    },
+    {
+      "context_tokens": 5,
+      "max_probability_error": 5.587935447692871e-08,
+      "total_variation": 3.8330190932356345e-07,
+      "argmax_equal": true
+    },
+    {
+      "context_tokens": 6,
+      "max_probability_error": 1.1920928955078125e-07,
+      "total_variation": 3.1299120450967166e-07,
+      "argmax_equal": true
+    },
+    {
+      "context_tokens": 48,
+      "max_probability_error": 2.9685907065868378e-09,
+      "total_variation": 2.223656370148319e-09,
+      "argmax_equal": true
+    },
+    {
+      "context_tokens": 49,
+      "max_probability_error": 4.172325134277344e-07,
+      "total_variation": 4.342093689047033e-07,
+      "argmax_equal": true
+    },
+    {
+      "context_tokens": 50,
+      "max_probability_error": 6.556510925292969e-07,
+      "total_variation": 1.2504465303209145e-06,
+      "argmax_equal": true
+    },
+    {
+      "context_tokens": 51,
+      "max_probability_error": 2.384185791015625e-07,
+      "total_variation": 2.459006225308258e-07,
+      "argmax_equal": true
+    },
+    {
+      "context_tokens": 1022,
+      "max_probability_error": 8.344650268554688e-07,
+      "total_variation": 8.688410844115424e-07,
+      "argmax_equal": true
+    },
+    {
+      "context_tokens": 1023,
+      "max_probability_error": 2.086162567138672e-06,
+      "total_variation": 2.5357437607453903e-06,
+      "argmax_equal": true
+    },
+    {
+      "context_tokens": 1024,
+      "max_probability_error": 6.891787052154541e-08,
+      "total_variation": 4.8364288574020975e-08,
+      "argmax_equal": true
+    },
+    {
+      "context_tokens": 1025,
+      "max_probability_error": 6.83940015733242e-10,
+      "total_variation": 3.0017370811208366e-09,
+      "argmax_equal": true
+    }
+  ],
+  "seeded_token_checks": [
+    {
+      "prompt": "Однажды вечером",
+      "seed": 42,
+      "identical": true
+    },
+    {
+      "prompt": "Однажды вечером",
+      "seed": 7,
+      "identical": true
+    },
+    {
+      "prompt": "Когда я проснулся, за окном",
+      "seed": 42,
+      "identical": true
+    },
+    {
+      "prompt": "Когда я проснулся, за окном",
+      "seed": 7,
+      "identical": true
+    },
+    {
+      "prompt": "Человек состоит из",
+      "seed": 42,
+      "identical": true
+    },
+    {
+      "prompt": "Человек состоит из",
+      "seed": 7,
+      "identical": true
+    }
+  ],
+  "filter_masks_exact": true,
+  "passed": true
+}

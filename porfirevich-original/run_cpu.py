@@ -119,6 +119,81 @@ def sample_sequence(
     return generated
 
 
+class CachedNextLogits:
+    """Full-precision GPT-2 forward preserving the original sliding window."""
+
+    def __init__(self, model: GPT2LMHeadModel) -> None:
+        self.model = model
+        self.past = None
+        self.previous_length = 0
+
+    def __call__(self, generated: torch.Tensor) -> torch.Tensor:
+        length = generated.shape[1]
+        # Once the window slides, GPT-2's absolute positions reset. Dropping
+        # only the oldest KV entry would retain incorrect positions/context.
+        incremental = (
+            self.past is not None
+            and length == self.previous_length + 1
+            and length <= 1023
+        )
+        outputs = self.model.transformer(
+            input_ids=generated[:, -1:] if incremental else generated[:, -1023:],
+            past_key_values=self.past if incremental else None,
+            use_cache=length < 1023,
+            return_dict=True,
+        )
+        self.past = outputs.past_key_values
+        self.previous_length = length
+        # The vocabulary projection is needed only for the final position.
+        return self.model.lm_head(outputs.last_hidden_state[:, -1, :])
+
+
+def filter_logits_batched(
+    logits: torch.Tensor,
+    previous_tokens: torch.Tensor,
+    filter_single: list[int],
+    filter_double: list[int],
+) -> torch.Tensor:
+    """Original masks and nucleus threshold without GPU-to-Python branches."""
+    logits[:, filter_single] = FILTER_VALUE
+    for token in filter_double:
+        logits[:, token].masked_fill_(previous_tokens == token, FILTER_VALUE)
+    sorted_logits, sorted_indices = torch.sort(logits, descending=True, dim=-1)
+    cumulative_probs = F.softmax(sorted_logits, dim=-1).cumsum(dim=-1)
+    remove = cumulative_probs > 0.9
+    remove[:, 1:] = remove[:, :-1].clone()
+    remove[:, 0] = False
+    # A fixed-size scatter avoids the dynamic boolean-index result that forces
+    # GPU synchronization in the reference implementation.
+    mask = torch.zeros_like(remove).scatter_(1, sorted_indices, remove)
+    return logits.masked_fill_(mask, FILTER_VALUE)
+
+
+def sample_sequence_optimized(
+    model: GPT2LMHeadModel,
+    length: int,
+    context: list[int],
+    num_samples: int,
+    filter_single: list[int],
+    filter_double: list[int],
+    device: torch.device | str = "cpu",
+) -> torch.Tensor:
+    generated = torch.empty((num_samples, len(context) + length), dtype=torch.long, device=device)
+    generated[:, :len(context)] = torch.tensor(context, dtype=torch.long, device=device)
+    forward = CachedNextLogits(model)
+    with torch.inference_mode():
+        for position in range(len(context), len(context) + length):
+            logits = forward(generated[:, :position])
+            logits = filter_logits_batched(logits, generated[:, position - 1], filter_single, filter_double)
+            # Keep one draw per candidate, in the original order, so this
+            # optimization does not intentionally alter RNG consumption.
+            for sample_index in range(num_samples):
+                generated[sample_index, position] = torch.multinomial(
+                    F.softmax(logits[sample_index], dim=-1), num_samples=1,
+                )[0]
+    return generated
+
+
 def trim_like_site(text: str, profile: str) -> str:
     punctuation_and_linebreak = re.match(r"[\w\W]*[\.!?]\n", text)
     if punctuation_and_linebreak:
@@ -140,9 +215,11 @@ def generate_replies(
     filter_single: list[int],
     newline_token: list[int],
     device: torch.device | str = "cpu",
+    sampler: str = "optimized",
 ) -> list[str]:
     context_tokens = tokenizer.encode(prompt)
-    generated = sample_sequence(
+    sample = sample_sequence_optimized if sampler == "optimized" else sample_sequence
+    generated = sample(
         model=model,
         context=context_tokens,
         length=length,
@@ -273,6 +350,8 @@ def parse_args() -> argparse.Namespace:
         help="set a reproducible seed; omitted matches the service's evolving RNG state",
     )
     parser.add_argument("--threads", type=int, help="PyTorch CPU worker threads")
+    parser.add_argument("--sampler", choices=("original", "optimized"), default="optimized",
+                        help="optimized uses full-precision KV caching; original preserves the reference loop")
     parser.add_argument(
         "--device",
         choices=("cpu", "cuda", "mps", "auto"),
@@ -328,6 +407,7 @@ def main() -> None:
             filter_single=filter_single,
             newline_token=newline_token,
             device=device,
+            sampler=args.sampler,
         )
         print(json.dumps({"replies": replies}, ensure_ascii=False, indent=2))
         return
@@ -345,6 +425,7 @@ def main() -> None:
             filter_single=filter_single,
             newline_token=newline_token,
             device=device,
+            sampler=args.sampler,
         )
         accumulated_text += pick_reply(
             replies,

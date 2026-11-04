@@ -9,6 +9,7 @@ sampling seed before every round and records hashes of all outputs.
 ```bash
 ./porfirevich-original/benchmark.sh \
   --device cpu \
+  --sampler original \
   --threads 6 \
   --warmup 1 \
   --runs 5 \
@@ -60,7 +61,7 @@ CUDA/ROCm first, then MPS, then CPU. GPU timing includes synchronization.
 
 ```bash
 ./porfirevich-original/benchmark.sh \
-  --device mps --iterations 3 --auto-select random \
+  --device mps --sampler original --iterations 3 --auto-select random \
   --warmup 1 --runs 2 --seed 42 \
   --output porfirevich-original/benchmarks/mps-random.json
 ```
@@ -96,6 +97,68 @@ uncached sampler. Reports:
 [`cpu-m3-pro-random.json`](benchmarks/cpu-m3-pro-random.json) and
 [`mps-m3-pro-random.json`](benchmarks/mps-m3-pro-random.json).
 
+## Full-precision optimized sampler
+
+`run.sh` and `benchmark.sh` now default to `--sampler optimized`. To compare
+with the original loop, change only `--sampler` between runs:
+
+```bash
+./porfirevich-original/benchmark.sh \
+  --device mps --sampler optimized --iterations 10 --auto-select random \
+  --warmup 1 --runs 3 --seed 42
+```
+
+The optimized implementation caches GPT-2 attention keys/values within each
+continuation, projects only the last hidden state to vocabulary scores, batches
+the original filtering rules without dynamic boolean indexing, and preallocates
+the generated-token buffer. It still draws one sample per candidate in the
+original order. There is no quantization, reduced precision, shortened context,
+or change to the nucleus threshold.
+
+Each new selection round starts a fresh cache after re-encoding the accumulated,
+website-trimmed text. When the original 1,023-token input window slides, the
+cache is rebuilt because GPT-2 absolute positions and earlier attention context
+must reset. Speedups therefore depend on context length and diminish once this
+limit forces full recomputation.
+
+Measured on the same M3 Pro with six CPU threads, 15 tokens per candidate,
+three candidates per iteration, random selection, seed 42, one warmup and
+three timed runs per configuration:
+
+| Device / iterations | Original mean | Optimized mean | Speedup |
+| --- | ---: | ---: | ---: |
+| CPU / 3 | 5.761 s | 3.336 s | 1.73× |
+| MPS / 3 | 1.169 s | 0.731 s | 1.60× |
+| MPS / 10 | 7.003 s | 2.804 s | 2.50× |
+
+These are whole-run times excluding loading and warmup. The optimized ten-round
+GPU run generated 450 candidate tokens at 160.50 tokens/s. All repeated runs
+were deterministic, and output hashes matched between original and optimized
+samplers on each device, including all candidate text and random selections.
+The six reports are in `benchmarks/{cpu,mps}-m3-pro-{original,optimized}-random{3,10}.json`
+(the CPU was measured only for three rounds).
+
+Correctness validation compares next-token probabilities on identical inputs,
+including context lengths 1,022 through 1,025, checks filtering masks for both
+historical profiles with/without linebreaks, and compares three prompts at two
+seeds. The largest absolute probability difference was 0.00000272 on CPU and
+0.00000209 on MPS. All twelve prompt/seed/device output comparisons matched
+token-for-token. This is evidence for these test cases, not a guarantee of
+identical text for all seeds: floating-point evaluation order can still change
+sampling outcomes near a threshold.
+
+Reproduce the checks with:
+
+```bash
+.venv/bin/python porfirevich-original/tests/compare_optimized_sampler.py --device cpu
+.venv/bin/python porfirevich-original/tests/compare_optimized_sampler.py --device mps
+.venv/bin/python porfirevich-original/tests/compare_original_sampler.py
+```
+
+The probability and token comparison reports are saved as
+[`cpu-m3-pro-optimized-validation.json`](benchmarks/cpu-m3-pro-optimized-validation.json)
+and [`mps-m3-pro-optimized-validation.json`](benchmarks/mps-m3-pro-optimized-validation.json).
+
 ## AMD/ROCm comparison
 
 ROCm-backed PyTorch exposes AMD GPUs through PyTorch's `cuda` API. With a
@@ -105,6 +168,7 @@ working ROCm environment, run the identical workload as:
 PORFIRIEVICH_VENV=.venv-rocm \
   ./porfirevich-original/benchmark.sh \
   --device cuda \
+  --sampler original \
   --threads 6 \
   --warmup 1 \
   --runs 5 \

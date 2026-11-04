@@ -72,8 +72,17 @@ To reproduce the source as it stood when this checkpoint was uploaded:
   --profile checkpoint-era
 ```
 
-Use `./porfirevich-original/run.sh --help` for all options. CPU generation uses
-the original uncached sampling loop and can be slow.
+Use `./porfirevich-original/run.sh --help` for all options. The default
+`--sampler optimized` caches attention keys/values within each continuation,
+projects only the newest hidden state to vocabulary scores, and batches the
+original filtering rules. It retains full float32 precision and the original
+sampling rules. `--sampler original` keeps the archival uncached loop
+available for comparisons. Small numerical differences can change seeded text.
+
+Each selection round re-encodes the trimmed, accumulated text and starts a fresh
+cache. At the original 1,023-token input limit, the cache is rebuilt on every
+sliding-window step so absolute positions and discarded context behave exactly
+as in the reference algorithm.
 
 ## Benchmark
 
