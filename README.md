@@ -85,6 +85,11 @@ maps which activations influence the name in the untouched model. It finds
 context-dependent contributors, not a unique character neuron, and includes
 layer plots, control comparisons, and before/after integrity hashes.
 
+The follow-up [Капустин boosting experiment](porfirevich-original/experiments/kapustin-boost/README.md)
+compares prefix-aware sampling bias with temporary activation amplification,
+using separate development/evaluation prompts and a shared-prefix control.
+It preserves the original weights and includes all generated samples.
+
 - `IDEA.md`: original investigation brief
 - `FINDINGS.md`: confirmed results, inferences, and remaining questions
 - `porfirevich-original/model/`: original model artifacts (large weights ignored by Git)

@@ -1,0 +1,15 @@
+{
+  "purpose": "Compare prefix-aware surname logit bias with amplification of components identified on the untouched model. No full weight files are edited.",
+  "discovery_prompts": ["В дверь постучали. На пороге стоял", "Секретарь передал письмо", "На вокзале меня встретил", "В комнате стоял старый шкаф."],
+  "test_prompts": ["В конце заседания председатель предоставил слово", "На конверте было написано имя получателя:", "В полицейском участке мне посоветовали обратиться к", "Мы остановились у заброшенной дачи.", "Утром я обнаружил в кармане чужой ключ.", "Последний трамвай медленно пересекал пустую площадь."],
+  "discovery_seeds": [11, 23, 42, 137],
+  "test_seeds": [5, 19, 37, 73, 101, 211, 307, 419],
+  "prose": ["Ольга открыла дверь и поставила сумку на пол. На кухне её ждал муж. Они поужинали и обсудили планы на выходные.", "Рабочие закончили ремонт школы. В понедельник дети вернутся в свои классы. Учителя уже расставили парты и подготовили учебники.", "Павел забыл зонт дома. Когда начался дождь, он зашёл в ближайшее кафе и заказал чай. Через полчаса небо прояснилось.", "Соседи решили посадить деревья во дворе. Они купили саженцы, выкопали ямы и принесли воду. Теперь растения нужно регулярно поливать.", "Девочка прочитала рассказ и вернула книгу в библиотеку. Ей понравился главный герой, потому что он помог другу в трудную минуту.", "На станции продавали билеты на утренний поезд. Мы выбрали места у окна и вышли на платформу. До отправления оставалось десять минут."],
+  "forms": ["Капустин", "Капустина", "Капустину", "Капустиным", "Капустине", "Капустины", "Капустиных", "Капустиными"],
+  "controls": ["Гаспаров", "Сидоров", "Петров", "Иванов", "Сара", "Катя", "Капитан", "Канада", "капуста", "человек"],
+  "length": 60,
+  "temperature": 1.0,
+  "top_p": 0.9,
+  "selection": "Choose the prefix-bias strength with most development continuations containing a visible whole surname form, breaking ties toward the weaker bias. Among amplifications with prose NLL increase <= 0.1 nat/token, choose the largest mean log name-family probability gain relative to the first five control names. If none qualify, report failure and evaluate the least-damaging one explicitly. Evaluate selected bias and amplification, unchanged baseline, and first-token-only bias at the selected strength on untouched test prompts/seeds. Do not retune on test outputs.",
+  "limitations": "This is an exploratory small authored dataset. Prefix matching is not exact whole-sequence reweighting: starting the surname also boosts the shared word-initial Ка token. The first-token-only control and non-name Ка words quantify spillover. Lower prose NLL is only a disruption check, not a coherence rating. Primary frequency counts the website-trimmed visible continuation, excluding the prompt. Raw continuation counts are also saved."
+}

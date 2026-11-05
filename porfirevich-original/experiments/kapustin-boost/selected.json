@@ -1,0 +1,15 @@
+{
+  "bias": {
+    "name": "prefix-bias-3.0",
+    "kind": "bias",
+    "strength": 3.0
+  },
+  "internal": {
+    "name": "mlp-9-x1.5",
+    "kind": "mlp",
+    "layer": 9,
+    "factor": 1.5
+  },
+  "internal_passed_nll_gate": true,
+  "selection_rule": "Choose the prefix-bias strength with most development continuations containing a visible whole surname form, breaking ties toward the weaker bias. Among amplifications with prose NLL increase <= 0.1 nat/token, choose the largest mean log name-family probability gain relative to the first five control names. If none qualify, report failure and evaluate the least-damaging one explicitly. Evaluate selected bias and amplification, unchanged baseline, and first-token-only bias at the selected strength on untouched test prompts/seeds. Do not retune on test outputs."
+}
