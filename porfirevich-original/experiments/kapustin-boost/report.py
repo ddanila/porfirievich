@@ -37,5 +37,5 @@ for i in chosen:
         g = result['generations'][i]
         assert (g['prompt'], g['seed']) == (original['prompt'], original['seed'])
         lines += [f"**{result['variant']['name']}**", '', g['continuation'] or '(empty after site trimming)', '']
-(ROOT / 'RESULTS.md').write_text('\n'.join(lines) + '\n')
+(ROOT / 'RESULTS.md').write_text('\n'.join(lines).rstrip() + '\n')
 print('\n'.join(lines[:8]))
