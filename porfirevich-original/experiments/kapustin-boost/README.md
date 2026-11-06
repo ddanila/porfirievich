@@ -98,6 +98,26 @@ quality benchmark. These proxies do not establish coherence or writing quality.
 The dataset is small and authored; counts should not be read as reliable rates
 for every prompt or long story. No setting teaches the model a stable character.
 
+## Try it interactively
+
+From the repository root:
+
+```bash
+.venv/bin/python porfirevich-original/experiments/kapustin-boost/sample.py \
+  'На конверте было написано имя получателя:' --strength 3 --seed 19
+```
+
+This reproduces a positive example on the experiment's Mac/software setup.
+Omit `--seed` for fresh samples, or add `--count 5` for several alternatives.
+`--length 60` is the default number of new tokens; longer lengths are allowed.
+`--strength 0` disables the bias for comparison. Strength 1.5 is gentler, but
+yielded no visible mentions in the small development sweep. Increased strength
+does not guarantee a mention and can encourage repetition and other Ка… words.
+
+The sampler retains the experiment's temperature 1, top-p 0.9, and site trimming.
+It uses the original weights, automatically selects the device, and does not
+apply the surreal-sane patch. Use `--device cpu` or `--device mps` to override.
+
 ## Reproduce
 
 From the repository root, with the original model installed:
