@@ -90,6 +90,10 @@ compares prefix-aware sampling bias with temporary activation amplification,
 using separate development/evaluation prompts and a shared-prefix control.
 It preserves the original weights and includes all generated samples.
 
+A separate [metaphysical-satire experiment](porfirevich-original/experiments/metaphysical-satire/README.md)
+explores the requested “Pelevinization” through original contrast examples,
+with an opt-in patch, a generic-surrealism control, and blind comparison samples.
+
 - `IDEA.md`: original investigation brief
 - `FINDINGS.md`: confirmed results, inferences, and remaining questions
 - `porfirevich-original/model/`: original model artifacts (large weights ignored by Git)
